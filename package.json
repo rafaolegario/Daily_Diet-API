@@ -1,0 +1,28 @@
+{
+  "name": "api_daily_diet",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsx --watch src/server.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@fastify/cookie": "^11.0.2",
+    "@rocketseat/eslint-config": "^2.2.2",
+    "dotenv": "^16.4.7",
+    "eslint": "^8.57.1",
+    "fastify": "^5.2.1",
+    "knex": "^3.1.0",
+    "sqlite3": "^5.1.7",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.5",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3"
+  }
+}
