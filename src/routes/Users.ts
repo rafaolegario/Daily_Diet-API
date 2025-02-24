@@ -36,4 +36,44 @@ export async function Users(app: FastifyInstance) {
 
     reply.status(201).send('created')
   })
+
+  app.post('/login', async (request, reply)=>{
+    const LoginUserBodySchema = z.object({
+      email: z.string(),
+      password: z.string(),
+    })
+
+    const { email, password } = LoginUserBodySchema.parse(request.body)
+
+    if ( !email || !password) {
+      return reply.status(400).send('All fields is required!')
+    }
+
+    const userExists = await knex('users').where('email', email).first()
+
+    if(!userExists || userExists.password !== password){
+      return reply
+      .status(401)
+      .send('Invalid email or password!, try again.')
+    }
+
+    let sessionId = request.cookies.sessionId
+
+    if(!sessionId){
+      sessionId = randomUUID()
+      reply.cookie('sessionId', sessionId,{
+        path: '/',
+        maxAge: 60 * 60 * 24 // 1 day
+      })
+
+      await knex('users').where('email',email).update({
+        session_id: sessionId
+      })
+
+      return reply.status(200).send('Successful, you are logged in')
+    }
+
+    reply.status(200).send('You are already logged in')
+    console.log(userExists)
+  })
 }
