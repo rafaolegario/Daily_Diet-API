@@ -1,24 +1,7 @@
-import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
+import { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 import { knex } from '../database'
 import { randomUUID } from 'node:crypto'
-
-async function FindCurrentUser(req: FastifyRequest, rep: FastifyReply) {
-  const sessionId = req.cookies.sessionId
-
-  if (!sessionId) {
-    return rep.status(404).send('User not found!')
-  }
-
-  const User = await knex('users').where('session_id', sessionId).first()
-
-  if (!User) {
-    return rep.status(404).send('User not found!')
-  }
-
-  return User
-}
-
 
 export async function Users(app: FastifyInstance) {
   app.post('/register', async (request, reply) => {
@@ -73,10 +56,9 @@ export async function Users(app: FastifyInstance) {
     }
 
     let sessionId = request.cookies.sessionId
-    const user_sessionId = userExists.sesion_id
+    const userSessionId = userExists.sesion_id
 
-  
-    if (!user_sessionId) {
+    if (!userSessionId) {
       sessionId = randomUUID()
       reply.cookie('sessionId', sessionId, {
         path: '/',
@@ -87,14 +69,17 @@ export async function Users(app: FastifyInstance) {
         session_id: sessionId,
       })
 
-      return reply.status(200).send({ message: 'Successful, you are logged in', user: userExists })
+      return reply
+        .status(200)
+        .send({ message: 'Successful, you are logged in', user: userExists })
     }
 
-    if(userExists.sesion_id !== sessionId){
+    if (userExists.sesion_id !== sessionId) {
       return reply.status(401).send('Unauthorized')
     }
 
-    reply.status(200).send({ message: 'You are already logged in', user: userExists })
-    
+    reply
+      .status(200)
+      .send({ message: 'You are already logged in', user: userExists })
   })
 }

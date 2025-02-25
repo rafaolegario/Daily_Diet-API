@@ -6,7 +6,6 @@ import { checkSessionIdExists } from '../middlewares/auth-middleware'
 
 let CurrentSequence = 0
 
-
 async function FindCurrentUser(req: FastifyRequest, rep: FastifyReply) {
   const sessionId = req.cookies.sessionId
 
@@ -24,197 +23,245 @@ async function FindCurrentUser(req: FastifyRequest, rep: FastifyReply) {
 }
 
 export async function Meals(app: FastifyInstance) {
+  app.get(
+    '/',
+    { preHandler: [checkSessionIdExists] },
+    async (request, reply) => {
+      const User = await FindCurrentUser(request, reply)
+      const userid = User.id
 
-  app.get('/',{ preHandler: [checkSessionIdExists] }, async (request, reply) =>{
-    const User = await FindCurrentUser(request, reply)
-    const user_id = User.id
+      const meals = await knex('meals').where('user_id', userid).select('*')
 
-    const meals = await knex('meals').where('user_id',user_id).select('*')
-
-    if(meals.length == 0){
-      return reply.status(200).send({ message:'You dont have registered meals'})
-    }
-
-    const userEmail = User.email
-    const userName = User.name
-    const user = {userEmail, userName}
-
-    reply.status(200).send({ user, meals })
-  })
-
-  app.get('/:id',{ preHandler: [checkSessionIdExists] }, async (request, reply) =>{
-    const User = await FindCurrentUser(request, reply)
-    const user_id = User.id
-
-    const IdParamsSchema = z.object({
-      id: z.string().uuid(),
-    })
-
-    const { id } = IdParamsSchema.parse(request.params)
-
-    if(!id){
-      return reply.status(400).send('All fields is required!')
-    }
-
-    const meal = await knex('meals').where('id',id).andWhere('user_id',user_id).first()
-
-    if(!meal){
-      return reply.status(200).send({ message:'You do not have meals registered with this ID'})
-    }
-
-    const userEmail = User.email
-    const userName = User.name
-    const user = {userEmail, userName}
-    reply.status(200).send({user, meal })
-  })
-
-  app.post('/create',{ preHandler: [checkSessionIdExists] }, async (request, reply) => {
-    const CreateMealsBodySchema = z.object({
-      name: z.string(),
-      calories: z.number(),
-      on_diet: z.boolean(),
-    })
-
-    const { name, calories, on_diet } = CreateMealsBodySchema.parse(
-      request.body,
-    )
-
-    if (!name || !calories) {
-      return reply.status(400).send('All fields is required!')
-    }
-
-    const User = await FindCurrentUser(request, reply)
-
-    const user_id = User.id
-
-    if(on_diet){
-      CurrentSequence++
-      if(CurrentSequence > User.best_sequence){
-        await knex('users').where('id', user_id).first().update({
-          best_sequence: CurrentSequence
-        })
+      if (meals.length === 0) {
+        return reply
+          .status(200)
+          .send({ message: 'You dont have registered meals' })
       }
-    }else{
-      CurrentSequence = 0
-    }
 
-    const meal = await knex('meals').insert({
-      user_id,
-      id: randomUUID(),
-      name,
-      calories,
-      on_diet,
-    }).returning('*')
+      const userEmail = User.email
+      const userName = User.name
+      const user = { userEmail, userName }
 
-    reply.status(201).send(meal)
-    
-  })
+      reply.status(200).send({ user, meals })
+    },
+  )
 
-  app.put('/:id',{preHandler:[checkSessionIdExists]}, async (request, reply) =>{
-    const User = await FindCurrentUser(request, reply)
-    const user_id = User.id
+  app.get(
+    '/:id',
+    { preHandler: [checkSessionIdExists] },
+    async (request, reply) => {
+      const User = await FindCurrentUser(request, reply)
+      const userid = User.id
 
-    const IdParamsSchema = z.object({
-      id: z.string().uuid(),
-    })
+      const IdParamsSchema = z.object({
+        id: z.string().uuid(),
+      })
 
-    const CreateMealsBodySchema = z.object({
-      name: z.string(),
-      calories: z.number(),
-      on_diet: z.boolean(),
-    })
+      const { id } = IdParamsSchema.parse(request.params)
 
-    const { name, calories, on_diet } = CreateMealsBodySchema.parse(
-      request.body,
-    )
+      if (!id) {
+        return reply.status(400).send('All fields is required!')
+      }
 
-    if (!name || !calories) {
-      return reply.status(400).send('All fields is required!')
-    }
+      const meal = await knex('meals')
+        .where('id', id)
+        .andWhere('user_id', userid)
+        .first()
 
+      if (!meal) {
+        return reply
+          .status(200)
+          .send({ message: 'You do not have meals registered with this ID' })
+      }
 
-    const { id } = IdParamsSchema.parse(request.params)
+      const userEmail = User.email
+      const userName = User.name
+      const user = { userEmail, userName }
+      reply.status(200).send({ user, meal })
+    },
+  )
 
-    if(!id){
-      return reply.status(400).send('All fields is required!')
-    }
+  app.post(
+    '/create',
+    { preHandler: [checkSessionIdExists] },
+    async (request, reply) => {
+      const CreateMealsBodySchema = z.object({
+        name: z.string(),
+        calories: z.number(),
+        diet: z.boolean(),
+      })
 
-    const meal = await knex('meals').where('id',id).andWhere('user_id',user_id).first()
+      const { name, calories, diet } = CreateMealsBodySchema.parse(request.body)
 
-    if(!meal){
-      return reply.status(200).send({ message:'You do not have meals registered with this ID'})
-    }
+      if (!name || !calories) {
+        return reply.status(400).send('All fields is required!')
+      }
 
-    const Altermeal = await knex('meals').where('id',id).andWhere('user_id',user_id).update({
-      name,
-      calories,
-      on_diet
-    }).returning('*')
+      const User = await FindCurrentUser(request, reply)
 
-    const userEmail = User.email
-    const userName = User.name
-    const user = {userEmail, userName}
-    reply.status(200).send({user, before: meal, after: Altermeal })
-  })
+      const userid = User.id
 
-  app.delete('/:id',{ preHandler:[checkSessionIdExists]}, async (request, reply) =>{
-    const User = await FindCurrentUser(request, reply)
-    const user_id = User.id
+      if (diet) {
+        CurrentSequence++
+        if (CurrentSequence > User.best_sequence) {
+          await knex('users').where('id', userid).first().update({
+            best_sequence: CurrentSequence,
+          })
+        }
+      } else {
+        CurrentSequence = 0
+      }
 
-    const IdParamsSchema = z.object({
-      id: z.string().uuid(),
-    })
+      const meal = await knex('meals')
+        .insert({
+          user_id: userid,
+          id: randomUUID(),
+          name,
+          calories,
+          on_diet: diet,
+        })
+        .returning('*')
 
-    const { id } = IdParamsSchema.parse(request.params)
+      reply.status(201).send(meal)
+    },
+  )
 
-    if(!id){
-      return reply.status(400).send('All fields is required!')
-    }
+  app.put(
+    '/:id',
+    { preHandler: [checkSessionIdExists] },
+    async (request, reply) => {
+      const User = await FindCurrentUser(request, reply)
+      const userid = User.id
 
-    const meal = await knex('meals').where('id',id).andWhere('user_id',user_id).first()
+      const IdParamsSchema = z.object({
+        id: z.string().uuid(),
+      })
 
-    if(!meal){
-      return reply.status(200).send({ message:'You do not have meals registered with this ID'})
-    }
+      const CreateMealsBodySchema = z.object({
+        name: z.string(),
+        calories: z.number(),
+        diet: z.boolean(),
+      })
 
-     const userEmail = User.email
-    const userName = User.name
-    const user = {userEmail, userName}
+      const { name, calories, diet } = CreateMealsBodySchema.parse(request.body)
 
-    reply.status(200).send({user, message:'Deleted meal', meal })
+      if (!name || !calories) {
+        return reply.status(400).send('All fields is required!')
+      }
 
-    await knex('meals').where('id',id).andWhere('user_id',user_id).first().delete()
-  })
+      const { id } = IdParamsSchema.parse(request.params)
+
+      if (!id) {
+        return reply.status(400).send('All fields is required!')
+      }
+
+      const meal = await knex('meals')
+        .where('id', id)
+        .andWhere('user_id', userid)
+        .first()
+
+      if (!meal) {
+        return reply
+          .status(200)
+          .send({ message: 'You do not have meals registered with this ID' })
+      }
+
+      if (diet) {
+        CurrentSequence++
+        if (CurrentSequence > User.best_sequence) {
+          await knex('users').where('id', userid).first().update({
+            best_sequence: CurrentSequence,
+          })
+        }
+      } else {
+        CurrentSequence = 0
+      }
+
+      const Altermeal = await knex('meals')
+        .where('id', id)
+        .andWhere('user_id', userid)
+        .update({
+          name,
+          calories,
+          on_diet: diet,
+        })
+        .returning('*')
+
+      const userEmail = User.email
+      const userName = User.name
+      const user = { userEmail, userName }
+      reply.status(200).send({ user, before: meal, after: Altermeal })
+    },
+  )
+
+  app.delete(
+    '/:id',
+    { preHandler: [checkSessionIdExists] },
+    async (request, reply) => {
+      const User = await FindCurrentUser(request, reply)
+      const userid = User.id
+
+      const IdParamsSchema = z.object({
+        id: z.string().uuid(),
+      })
+
+      const { id } = IdParamsSchema.parse(request.params)
+
+      if (!id) {
+        return reply.status(400).send('All fields is required!')
+      }
+
+      const meal = await knex('meals')
+        .where('id', id)
+        .andWhere('user_id', userid)
+        .first()
+
+      if (!meal) {
+        return reply
+          .status(200)
+          .send({ message: 'You do not have meals registered with this ID' })
+      }
+
+      const userEmail = User.email
+      const userName = User.name
+      const user = { userEmail, userName }
+
+      reply.status(200).send({ user, message: 'Deleted meal', meal })
+
+      await knex('meals')
+        .where('id', id)
+        .andWhere('user_id', userid)
+        .first()
+        .delete()
+    },
+  )
 
   app.get(
     '/summary',
     { preHandler: [checkSessionIdExists] },
     async (request, reply) => {
       const User = await FindCurrentUser(request, reply)
-      const user_id = User.id
-      const Best_sequence = User.best_sequence
-  
-      const meals_On_Diet = await knex('meals').where('user_id',user_id).andWhere('on_diet', 1).count('on_diet', {as: 'on_diet'}).first()
-      const meals_Out_Diet = await knex('meals').where('user_id',user_id).andWhere('on_diet', 0).count('on_diet', {as: 'out_diet'}).first()
-      const allMeals = await knex('meals').where('user_id',user_id)
+      const userid = User.id
+      const BestSequence = User.best_sequence
 
-      reply.status(200).send(
-        {
-          Total_Meals: allMeals.length,
-          Meals_on_Diet: Number(meals_On_Diet?.on_diet || 0),
-          Meals_out_Diet: Number(meals_Out_Diet?.out_diet || 0),
-          Best_diet_Sequence: Best_sequence
-        }
-      )
-      
+      const mealsOnDiet = await knex('meals')
+        .where('user_id', userid)
+        .andWhere('on_diet', 1)
+        .count('on_diet', { as: 'on_diet' })
+        .first()
+      const mealsOutDiet = await knex('meals')
+        .where('user_id', userid)
+        .andWhere('on_diet', 0)
+        .count('on_diet', { as: 'out_diet' })
+        .first()
+      const allMeals = await knex('meals').where('user_id', userid)
+
+      reply.status(200).send({
+        Total_Meals: allMeals.length,
+        Meals_on_Diet: Number(mealsOnDiet?.on_diet || 0),
+        Meals_out_Diet: Number(mealsOutDiet?.out_diet || 0),
+        Best_diet_Sequence: BestSequence,
+      })
     },
   )
-
-  app.delete('/',{ preHandler:[checkSessionIdExists]}, async (request, reply) =>{
-    const User = await FindCurrentUser(request, reply)
-    const user_id = User.id
-
-     await knex('meals').where('user_id',user_id).select('*').delete()
-    reply.status(200).send('DEU GREEN')
-  })
 }
