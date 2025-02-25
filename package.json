@@ -12,6 +12,7 @@
   "dependencies": {
     "@fastify/cookie": "^11.0.2",
     "@rocketseat/eslint-config": "^2.2.2",
+    "@types/supertest": "^6.0.2",
     "dotenv": "^16.4.7",
     "eslint": "^8.57.1",
     "fastify": "^5.2.1",
@@ -21,8 +22,10 @@
   },
   "devDependencies": {
     "@types/node": "^22.13.5",
+    "supertest": "^7.0.0",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.3",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.7"
   }
 }
