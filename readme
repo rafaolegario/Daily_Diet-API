@@ -1,0 +1,142 @@
+Fastify API - User & Meals Management
+Este projeto é uma API construída com Fastify, Knex.js e SQLite, com funcionalidades para registro e login de usuários, além de gerenciamento de refeições (CRUD). A aplicação oferece rotas de criação, listagem, atualização e exclusão de refeições, sendo que a autenticação é realizada através de cookies de sessão.
+
+Tecnologias Utilizadas
+Fastify: Framework web rápido e de baixo overhead para Node.js.
+Knex.js: Construtor de consultas SQL para Node.js.
+SQLite: Banco de dados SQL leve e baseado em arquivos.
+Vitest: Framework de testes unitários para testar as rotas da API.
+Supertest: Biblioteca para realizar requisições HTTP e testar a API.
+Pré-requisitos
+Antes de rodar o projeto, você precisa ter o Node.js instalado. Você pode verificar a instalação do Node.js com o seguinte comando:
+
+bash
+Copy
+Edit
+node -v
+Instalar dependências
+Clone o repositório e instale as dependências do projeto:
+
+bash
+Copy
+Edit
+git clone <URL_DO_REPOSITORIO>
+cd <DIRETORIO_DO_PROJETO>
+npm install
+Variáveis de Ambiente
+Crie um arquivo .env na raiz do projeto com a seguinte variável:
+
+env
+Copy
+Edit
+DATABASE_URL=./database.db
+Rodando o Projeto
+Para rodar a aplicação, execute o seguinte comando:
+
+bash
+Copy
+Edit
+npm run dev
+Isso irá iniciar a API no http://localhost:3000.
+
+Rotas
+1. /register (POST)
+Registra um novo usuário.
+
+Body:
+
+json
+Copy
+Edit
+{
+  "name": "Jonh Doe",
+  "email": "jonhDoe@gmail.com",
+  "password": "1234pass"
+}
+Resposta:
+
+201 Created: Usuário registrado com sucesso.
+400 Bad Request: Campos obrigatórios não preenchidos.
+401 Unauthorized: E-mail já registrado.
+2. /login (POST)
+Realiza o login de um usuário.
+
+Body:
+
+json
+Copy
+Edit
+{
+  "email": "jonhDoe@gmail.com",
+  "password": "1234pass"
+}
+Resposta:
+
+200 OK: Login bem-sucedido.
+400 Bad Request: Campos obrigatórios não preenchidos.
+401 Unauthorized: E-mail ou senha inválidos.
+3. /meals/create (POST)
+Cria uma nova refeição.
+
+Body:
+
+json
+Copy
+Edit
+{
+  "name": "Pizza",
+  "calories": 1000,
+  "diet": false
+}
+Resposta:
+
+201 Created: Refeição criada com sucesso.
+4. /meals (GET)
+Lista todas as refeições.
+
+Resposta:
+
+200 OK: Lista de refeições.
+5. /meals/{id} (GET)
+Retorna uma refeição específica pelo ID.
+
+Resposta:
+
+200 OK: Refeição encontrada.
+6. /meals/{id} (PUT)
+Atualiza uma refeição específica pelo ID.
+
+Body:
+
+json
+Copy
+Edit
+{
+  "name": "Salada",
+  "calories": 250,
+  "diet": true
+}
+Resposta:
+
+200 OK: Refeição atualizada com sucesso.
+7. /meals/{id} (DELETE)
+Deleta uma refeição específica pelo ID.
+
+Resposta:
+
+200 OK: Refeição deletada com sucesso.
+Testes
+Este projeto utiliza o Vitest para rodar os testes unitários. Para rodar os testes, execute o seguinte comando:
+
+bash
+Copy
+Edit
+npm run test
+Como Contribuir
+Faça um fork deste repositório.
+Crie uma nova branch para sua feature (git checkout -b minha-feature).
+Faça as mudanças e commit.
+Envie para o fork (git push origin minha-feature).
+Crie um pull request.
+Licença
+Este projeto está licenciado sob a MIT License - veja o arquivo LICENSE para mais detalhes.
