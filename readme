@@ -1,18 +1,20 @@
-Fastify API - User & Meals Management
-Este projeto é uma API construída com Fastify, Knex.js e SQLite, com funcionalidades para registro e login de usuários, além de gerenciamento de refeições (CRUD). A aplicação oferece rotas de criação, listagem, atualização e exclusão de refeições, sendo que a autenticação é realizada através de cookies de sessão.
+# Fastify API - User & Meals Management
 
-Tecnologias Utilizadas
-Fastify: Framework web rápido e de baixo overhead para Node.js.
-Knex.js: Construtor de consultas SQL para Node.js.
-SQLite: Banco de dados SQL leve e baseado em arquivos.
-Vitest: Framework de testes unitários para testar as rotas da API.
-Supertest: Biblioteca para realizar requisições HTTP e testar a API.
-Pré-requisitos
+Este projeto é uma API construída com **Fastify**, **Knex.js** e **SQLite**, com funcionalidades para registro e login de usuários, além de gerenciamento de refeições (CRUD). A aplicação oferece rotas de criação, listagem, atualização e exclusão de refeições, sendo que a autenticação é realizada através de cookies de sessão.
+
+## Tecnologias Utilizadas
+
+- **Fastify**: Framework web rápido e de baixo overhead para Node.js.
+- **Knex.js**: Construtor de consultas SQL para Node.js.
+- **SQLite**: Banco de dados SQL leve e baseado em arquivos.
+- **Vitest**: Framework de testes unitários para testar as rotas da API.
+- **Supertest**: Biblioteca para realizar requisições HTTP e testar a API.
+
+## Pré-requisitos
+
 Antes de rodar o projeto, você precisa ter o Node.js instalado. Você pode verificar a instalação do Node.js com o seguinte comando:
 
-bash
-Copy
-Edit
+```bash
 node -v
 Instalar dependências
 Clone o repositório e instale as dependências do projeto:
@@ -126,17 +128,16 @@ Resposta:
 
 200 OK: Refeição deletada com sucesso.
 Testes
-Este projeto utiliza o Vitest para rodar os testes unitários. Para rodar os testes, execute o seguinte comando:
+O projeto utiliza o Vitest e o Supertest para testes automatizados.
+
+Rodando os testes
+Para rodar os testes, execute o comando:
 
 bash
 Copy
 Edit
 npm run test
-Como Contribuir
-Faça um fork deste repositório.
-Crie uma nova branch para sua feature (git checkout -b minha-feature).
-Faça as mudanças e commit.
-Envie para o fork (git push origin minha-feature).
-Crie um pull request.
+Isso irá executar todos os testes da aplicação.
+
 Licença
-Este projeto está licenciado sob a MIT License - veja o arquivo LICENSE para mais detalhes.
+Este projeto está licenciado sob a Licença MIT - veja o arquivo LICENSE para mais detalhes.
